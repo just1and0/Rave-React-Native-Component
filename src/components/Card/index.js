@@ -13,7 +13,7 @@ export default class index extends Component {
     super(props);
     
     let cardnum = this.init_cc('5438898014560229');
-    this.state = { cardno: '', cvv: '', status: "", cardnoErr: 'none', dateErr: 'none', expirymonth: '', expiryyear: '', amount: '', firstname: 'Oluwole', lastname: 'Adebiyi', email: 'flamekeed@gmail.com', pin:"", pinModal: false };
+    this.state = { cardno: '', cvv: '', status: "", cardnoErr: 'none', dateErr: 'none', cvvErr:'none', expirymonth: '', expiryyear: '', amount: '', firstname: 'Oluwole', lastname: 'Adebiyi', email: 'flamekeed@gmail.com', pin:"", pinModal: false };
     this.cc_format = this.cc_format.bind(this);
     this.confirmPin = this.confirmPin.bind(this);
     this.pay = this.pay.bind(this);
@@ -65,8 +65,7 @@ export default class index extends Component {
     this.setState({
       cardnoErr: 'none', dateErr: 'none', cvvErr: 'none'
     })
-    if (this.state.cardno == "" || this.state.cvv == "" || this.state.expirymonth == "" || this.state.expiryyear == "") {
-      console.log(this.state.cardno.replace(/\s/g, "").length);
+    if (this.state.cardno.replace(/\s/g, "").length < 13 || this.state.cvv.length < 3 || this.state.expirymonth.length < 2 || this.state.expiryyear.length < 2) {
       
       if (this.state.cardno.replace(/\s/g, "").length < 13) {
         this.setState({
@@ -74,9 +73,14 @@ export default class index extends Component {
         })
       }
 
-      if (this.state.expirymonth.length < 2 && this.state.expiryyear.length < 2) {
+      if (this.state.expirymonth.length < 2 || this.state.expiryyear.length < 2) {
         this.setState({
           dateErr: 'flex'
+        })
+      } 
+      if (this.state.cvv.length < 3) {
+        this.setState({
+          cvvErr: 'flex'
         })
       }
     }
@@ -147,7 +151,7 @@ export default class index extends Component {
           <View style={styles.formGroup}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
               <View style={{ flexGrow: 1, paddingRight: 10, maxWidth:150 }}>
-                <Text style={styles.label}>Exp. Date {this.state.expirymonth}</Text>
+                <Text style={styles.label}>Exp. Date</Text>
                 <View style={styles.input}>
                   <View style={{ paddingVertical: 11.4, flexDirection: 'row', justifyContent: 'space-between' }}>
                     <TextInput
@@ -238,20 +242,21 @@ export default class index extends Component {
                 <Text style={{ color: '#EE312A', fontSize: 8, display: this.state.dateErr, fontWeight: 'bold', marginTop: 5 }}>Enter a valid credit card number</Text>
               </View>
               <View style={{ flexGrow: 1, paddingLeft: 10, maxWidth: 150  }}>
-                <Text style={styles.label}>CVV</Text>
+                <Text style={styles.label}>CVV/CVV2</Text>
                 <View style={styles.input}>
                   <TextInput
                     ref="3"
                     autoCorrect={false}
                     keyboardType="numeric"
                     maxLength={4}
-                    secureTextEntry={true}
+                    // secureTextEntry={true}
                     underlineColorAndroid='rgba(0,0,0,0)'
                     style={{ height: 45, width: '100%', fontSize: 20 }}
                     onChangeText={(cvv) => this.setState({ cvv })}
                     value={this.state.cvv}
                   />
                 </View>
+                <Text style={{ color: '#EE312A', fontSize: 8, display: this.state.cvvErr, fontWeight: 'bold', marginTop: 5 }}>Enter a valid CVV</Text>
               </View>
             </View>
               
