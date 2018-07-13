@@ -27,14 +27,14 @@ export default class HeaderContainer extends Component {
   render() {
     return (
       <View>
-        <Header />
+        {/* <Header /> */}
         <View style={styles.container}>
           <View style={styles.nav}>
             <TouchableOpacity
               style={{
                 width: '49.5%'}}
-              onPress={this.switchToCard}>
-              <Text style={{ fontSize: 18, paddingVertical: 15, color: "#12122D", fontWeight: (this.state.page == "card")? "bold":"normal"}}>Card</Text>
+                onPress={this.switchToCard}>
+              <Text style={{ fontSize: 18, textAlign: 'center', paddingVertical: 15, color: "#12122D", fontWeight: (this.state.page == "card") ? "bold" : "normal", borderBottomColor: "#12122D", borderBottomWidth: (this.state.page == "card") ? 2 : 1}}>Card</Text>
             </TouchableOpacity>
             <View style={{ width: '1%', marginVertical: 10, borderRightWidth: 1, borderRightColor: "#12122D" }}></View>
             <TouchableOpacity
@@ -43,7 +43,7 @@ export default class HeaderContainer extends Component {
                 width: '49.5%'
               }}
               onPress={this.switchToAccount}>
-              <Text style={{ fontSize: 18, paddingVertical: 15, color: "#12122D", textAlign: 'right', fontWeight: (this.state.page == "account") ? "bold" : "normal" }}>Account</Text>
+              <Text style={{ fontSize: 18, textAlign: 'center', paddingVertical: 15, color: "#12122D", fontWeight: (this.state.page == "account") ? "bold" : "normal", borderBottomColor:"#12122D", borderBottomWidth: (this.state.page == "account") ? 2 : 1 }}>Account</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -55,8 +55,7 @@ export default class HeaderContainer extends Component {
 
 const styles = StyleSheet.create({
   container: {
-    paddingHorizontal: 20,
-    marginTop: -20
+    marginTop: 0
   },
   nav: {
     borderRadius: 5,
@@ -66,7 +65,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 7,
     flexDirection: 'row',
-    paddingHorizontal: 30,
+    paddingTop: 30,
     justifyContent: 'space-between',
     width: '100%'
   }

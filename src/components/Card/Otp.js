@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { StyleSheet, Modal, Text, Image, TextInput, TouchableOpacity, View } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
-export default class PinModal extends Component {
+export default class OtpModal extends Component {
   constructor(props) {
     super(props);
   }
@@ -13,17 +13,17 @@ export default class PinModal extends Component {
         <Modal
           animationType="fade"
           transparent={true}
-          visible={this.props.pinModal}
+          visible={this.props.otpModal}
           onRequestClose={() => {
             alert('Modal has been closed.');
         }}>
         <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: "rgba(0,0,0,.7)" }}>
             <View style={{ backgroundColor: "white", borderTopWidth: 5, borderTopColor:"#12122D", width: "90%", maxWidth: 400, paddingVertical: 40, paddingHorizontal:50}}>
-              <Text style={{ textAlign: "center" }}>Please enter card pin to continue transaction</Text>
+              <Text style={{ textAlign: "center" }}>Please enter the OTP sent to your phone</Text>
 
 
               <View style={styles.formGroup}>
-                <Text style={styles.label}>Pin</Text>
+                <Text style={styles.label}>OTP</Text>
                 <View style={styles.input}>
                   <View style={{ paddingVertical: 10, flexDirection: 'row' }}>
                     <View style={{ paddingTop: 6 }}>
@@ -33,11 +33,10 @@ export default class PinModal extends Component {
                       <TextInput
                         autoCorrect={false}
                         keyboardType="numeric"
-                        secureTextEntry={true}
                         style={{ fontSize: 20, paddingHorizontal: 10, minWidth: "98%" }}
                         underlineColorAndroid='rgba(0,0,0,0)'
-                        onChangeText={(pin) => this.props.pinEdit(pin)}
-                        value={this.props.pin}
+                        onChangeText={(otp) => this.props.otpEdit(otp)}
+                        value={this.props.otp}
                       />
                     </View>
                   </View>
