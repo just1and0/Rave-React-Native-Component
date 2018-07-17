@@ -1,13 +1,13 @@
 import React, { Component } from 'react';
-import { StyleSheet, Modal, WebView, Text, Image, TextInput, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Modal, WebView } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import { VBVComponent } from 'react-native-rave-networking';
 
 
 export default class VBVSecure extends Component {
   constructor(props) {
     super(props);
-    // this.
+    this.numberOfPageLoads = 0;
+    this.maxPageLoads = this.props.maxPageLoads || 3;
   }
 
 
@@ -16,18 +16,34 @@ export default class VBVSecure extends Component {
       <Modal
         animationType="fade"
         transparent={false}
-        visible={this.props.vbvModal}
-        onRequestClose={() => {
-          alert('Modal has been closed.');
-        }}>
-        <VBVComponent style={{marginTop: 80, padding: 50}} url={this.props.url} getMessageReturned={(err, message) => {
-          if (err) {
-            this.props.confirm(message);
+        visible={this.props.vbvModal}>
+
+        <WebView
+          source={{uri: this.props.url}}
+          style={{marginTop: 80, padding: 50}}
+          javaScriptEnabled={true}
+          injectedJavaScript={"window.postMessage(document.getElementsByTagName('BODY')[0].innerHTML)"}
+          onMessage={(message) => {
+            let returnedMessage = message.nativeEvent.data;
+              // Attempt to parse a json
+              try {
+                let returnedJson = JSON.parse(returnedMessage);
+                // first parameter indicates whether there was an error
+                this.props.confirm(false, returnedJson);
+              } catch (e) {
+                // If the response is not json (note, the homepage is not json so we have to allow multiple attempts at parsing)
+                // Allow max 3 page loads (default), if we still can't get a json, we return an error
+                if (this.numberOfPageLoads >= this.maxPageLoads) {
+                  this.props.confirm(true, returnedMessage)
+                  this.props.confirm(true, returnedMessage);
+                }
+
+                this.numberOfPageLoads += 1;
+              }
+
+            }
           }
-          else {
-            this.props.confirm(message);
-          }
-        }} />
+        />
       </Modal>
     );
   }

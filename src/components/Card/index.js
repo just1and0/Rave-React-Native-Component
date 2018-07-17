@@ -7,26 +7,18 @@ import Pin from './Pin';
 
 //Import the OTP modal
 import Otp from './Otp';
-
-// Import Tofunmi's Library
-import RaveApi from 'react-native-rave-networking';
 import VBVSecure from './vbvSecure';
-
-
-
-// import AuthURL from './AuthURL';
-
+import IntlModal from './Intl';
 
 var valid = require('card-validator');
 
 
-rave = new RaveApi("FLWPUBK-8ba286388b24dbd6c20706def0b4ea23-X", "FLWSECK-c45e0f704619e673263844e584bba013-X", production = false);
 
 export default class index extends Component {
   constructor(props) {
     super(props);
     
-    this.state = { cardno: '', cvv: '', status: "", vbvModal: false, vbvurl: '', cardnoErr: 'none', dateErr: 'none', cvvErr: 'none', expirymonth: '', expiryyear: '', amount: '500', firstname: 'Oluwole', lastname: 'Adebiyi', email: 'flamekeed@gmail.com', pin: "", pinModal: false, otp: "", flwRef: "", otpModal: false, loading: false, otp: "12345"};
+    this.state = { cardno: '', cvv: '', status: "", chargeResponseMessage: '', suggested_auth: "", vbvModal: false, vbvurl: '', cardnoErr: 'none', dateErr: 'none', cvvErr: 'none', expirymonth: '', expiryyear: '', amount: '500', firstname: 'Oluwole', lastname: 'Adebiyi', email: 'flamekeed@gmail.com', pin: "", pinModal: false, otp: "", flwRef: "", otpModal: false, intlModal: false, loading: false, otp: "", intl: {}};
 
     this.cc_format = this.cc_format.bind(this);
     this.confirmPin = this.confirmPin.bind(this);
@@ -34,6 +26,7 @@ export default class index extends Component {
     this.pay = this.pay.bind(this); 
     this.check = this.check.bind(this);
     this.confirmVBV = this.confirmVBV.bind(this);
+    this.confirmIntl = this.confirmIntl.bind(this);
   }
 
   // Makes the card input appear in 4-digit interval apart from VERVE cards eg 4242 4242 4242 4242 instead of 4242424242424242
@@ -68,62 +61,37 @@ export default class index extends Component {
   //This closes the pin modal and adds the pin to the payload
   confirmPin() {
     this.setState({
-      pinModal: false
+      pinModal: false,
     })
 
-    rave.Card.charge({
+    this.props.rave.pinCharge({
       "cardno": this.state.cardno.replace(/\s/g, ""),
       "cvv": this.state.cvv,
       "expirymonth": this.state.expirymonth,
       "expiryyear": this.state.expiryyear,
-      "amount": this.state.amount,
-      "email": this.state.email,
-      "firstname": "Oluwole",
-      "lastname": "Adebiyi",
-      "pin": this.state.pin,
-      "suggested_auth": "PIN"
-    })
-      .then((res) => {
-        console.log(res);
-        this.setState({
-          loading: false,
-          flwRef: res.flwRef
-        })
-
-        console.log(res);
+      "pin": this.state.pin
+    }).then((response) => {
+      if (response.data.chargeResponseCode === "02") {
+        //validate with otp
         
         this.setState({
+          chargeResponseMessage: response.data.chargeResponseMessage,
           otpModal: true,
-          loading: true
+          loading: true,
+          flwRef: response.data.flwRef
         })
-        
-        // if (res.status == "success") {
-        //   console.log(res);
-          
-        //   if (res.validationComplete == false) {
-        //     if (res.authSuggested == "PIN") {
-        //       this.setState({
-        //         loading: true,
-        //         pinModal: true
-        //       })
-        //     }
-        //     // this.setState({
-        //     //   loading: true,
-        //     //   otpModal: true
-        //     // })
-        //   } else {
-        //     console.log(res);
-
-        //   }
-        // }
-
-      })
-      .catch((err) => {
-        console.error(err);
+      } else if (response.data.status.toUpperCase() === "SUCCESSFUL") {
         this.setState({
           loading: false
         })
-      })
+        this.props.onSuccess(response);
+      }
+      }).catch((e) => {
+        this.setState({
+          loading: false
+        })
+      this.props.onFailure(e);
+    })
   }
 
   //This closes the otp modal and makes the otp validate
@@ -132,29 +100,72 @@ export default class index extends Component {
       otpModal: false
     })
 
-    rave.Card.validate(this.state.otp, this.state.flwRef)
-      .then((res) => {
-        console.log(res);
-        
-        if (res.status == "success" && res.validationComplete == true) {
-          this.setState({
-            loading: false
-          })
-        }
-      })
-      .catch((err) => {
-        console.error(err);
-      })
+    //validate with otp
+    this.props.rave.validateWithOTP({ transaction_reference: this.state.flwRef, otp: this.state.otp }).then((res) => {
+
+      if (res.data.tx.status.toUpperCase() === "SUCCESSFUL") {
+        this.setState({
+          loading: false
+        })
+        this.props.onSuccess(res);
+      }
+    }).catch((e) => {
+        this.setState({
+          loading: false
+        })
+      this.props.onFailure(e);
+    })
+
   }
 
   //This closes the vbv modal and makes validation
-  confirmVBV(data) {
+  confirmVBV(err, data) {
     this.setState({
-      vbvModal: false
+      vbvModal: false,
+      loading: false
+    })
+    
+    if (err) {
+      this.props.onFailure(data);
+    }
+
+    else {
+      this.props.onSuccess(data);
+    }
+  }
+
+  confirmIntl(data) {
+    this.setState({
+      intlModal: false
     })
 
-    console.log(data);
-    
+    this.props.rave.avsCharge({
+      "cardno": this.state.cardno.replace(/\s/g, ""),
+      "cvv": this.state.cvv,
+      "expirymonth": this.state.expirymonth,
+      "expiryyear": this.state.expiryyear,
+      "billingzip": data.zipcode,
+      "billingcity": data.city,
+      "billingaddress": data.address,
+      "billingstate": data.state,
+      "billingcountry": data.country,
+      
+    }, this.state.suggested_auth).then((response) => {
+
+      if (response.data.chargeResponseCode === "02") {
+        if (response.data.authModelUsed.toUpperCase() === "VBVSECURECODE") {
+          this.setState({ vbvModal: true, vbvurl: response.data.authurl });
+        }
+      }
+
+      }).catch((e) => {
+        this.setState({
+          loading: false
+        })
+        this.props.onFailure(e);
+    })   
+
+
   }
 
   // Performs a check on the card form
@@ -190,57 +201,61 @@ export default class index extends Component {
 
   // Sends payload to Flutterwave
   charge() {
+    //Set button to loading
     this.setState({
       loading: true
     })
-    rave.Card.charge({
+    // Initiate the charge
+    this.props.rave.initiatecharge({
       "cardno": this.state.cardno.replace(/\s/g, ""),
       "cvv": this.state.cvv,
       "expirymonth": this.state.expirymonth,
-      "expiryyear": this.state.expiryyear,
-      "amount": this.state.amount,
-      "email": this.state.email,
-      "firstname": "Oluwole",
-      "lastname": "Adebiyi"
-    })
-      .then((res) => {
-        console.log(res);
-        this.setState({
-          loading: false,
-          flwRef: res.flwRef
-        })
-
-        if (!res.validationComplete) {
-          if (res.authSuggested == "PIN") {
-            this.setState({
-              loading: true,
-              pinModal: true
-            })
-          }
-
-          if (res.authUrl) {
-            // display the vbv modal
-            console.log("I'm here");
-            
-            this.setState({ vbvModal: true, vbvurl: res.authUrl });
-          }
-
-          // this.setState({
-          //   loading: true,
-          //   otpModal: true
-          // })
-        } else {
-          console.log(res);
-          
+      "expiryyear": this.state.expiryyear
+    }).then((res) => {      
+      // Check for suggested auth
+      if (res.data.suggested_auth) {
+        if (res.data.suggested_auth.toUpperCase() === "PIN") {
+          this.setState({
+            pinModal: true,
+            suggested_auth: res.data.authSuggested
+          })
+        } else if (res.data.suggested_auth.toUpperCase() === "NOAUTH_INTERNATIONAL" || res.data.suggested_auth.toUpperCase() === "AVS_VBVSECURECODE") {
+          this.setState({
+            intlModal: true,
+            suggested_auth: res.data.authSuggested
+          })
         }
-        
-      })
-      .catch((err) => {
-        console.error(err);
+      } else {
+        if (res.data.status.toUpperCase() === "SUCCESSFUL") {
+          this.setState({
+            loading: false
+          })
+          this.props.onSuccess(res);
+          
+        } else if (res.data.chargeResponseCode === "02") {
+          if (res.data.authModelUsed.toUpperCase() === "ACCESS_OTP" || res.data.authModelUsed.toUpperCase() === "GTB_OTP") {
+            this.setState({
+              otpModal: true,
+              loading: true,
+              chargeResponseMessage: res.data.chargeResponseMessage
+            })
+          } else if (res.data.authModelUsed.toUpperCase() === "PIN") {
+            this.setState({
+              pinModal: true,
+              suggested_auth: res.data.authSuggested
+            })
+          } else if (res.data.authModelUsed.toUpperCase() === "VBVSECURECODE") {
+            this.setState({ vbvModal: true, vbvurl: res.data.authurl });
+          }
+        }
+      }
+
+      }).catch((e) => {
         this.setState({
           loading: false
         })
-      })
+      this.props.onFailure(e);
+    })
     
   }
 
@@ -295,21 +310,10 @@ export default class index extends Component {
     return (
       <KeyboardAwareScrollView style={styles.container}>
         <Pin pinModal={this.state.pinModal} confirm={this.confirmPin} pin={this.state.pin} pinEdit={(pin) => this.setState({ pin })} />
-        <Otp otpModal={this.state.otpModal} confirm={this.confirmOtp} otp={this.state.otp} otpEdit={(otp) => this.setState({ otp })} />
+        <Otp otpModal={this.state.otpModal} confirm={this.confirmOtp} otp={this.state.otp} chargeResponseMessage={this.state.chargeResponseMessage} otpEdit={(otp) => this.setState({ otp })} />
+        <IntlModal intlModal={this.state.intlModal} confirm={this.confirmIntl} />
         <VBVSecure vbvModal={this.state.vbvModal} url={this.state.vbvurl} confirm={this.confirmVBV} />
         <View style={{flex:1}}>
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>Amount</Text>
-            <View style={styles.input}>
-              <TextInput
-                keyboardType="numeric"
-                underlineColorAndroid='rgba(0,0,0,0)'
-                style={{ height: 40, width: '100%', fontSize: 20 }}
-                onChangeText={(amount) => this.setState({ amount })}
-                value={this.state.amount}
-              />
-            </View>
-          </View>
           <View style={styles.formGroup}>
             <Text style={styles.label}>Card Number</Text>
             <View style={styles.input}>
@@ -320,6 +324,7 @@ export default class index extends Component {
                 <View>
                   <TextInput
                     autoCorrect={false}
+                    editable={(this.state.loading)?false:true}
                     keyboardType="numeric"
                     style={{ fontSize: 20, paddingHorizontal: 10, minWidth:"95%"}}
                     underlineColorAndroid='rgba(0,0,0,0)'
@@ -339,6 +344,7 @@ export default class index extends Component {
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                     <TextInput
                       autoCorrect={false}
+                      editable={(this.state.loading) ? false : true}
                       ref="1"
                       keyboardType="numeric"
                       style={{ fontSize: 20, flexGrow: 2, height: 45 }}
@@ -398,6 +404,7 @@ export default class index extends Component {
                     <Text style={{ fontSize: 20, paddingTop:7, flexGrow: 1 }}>/</Text>
                     <TextInput
                       autoCorrect={false}
+                      editable={(this.state.loading) ? false : true}
                       ref="2"
                       keyboardType="numeric"
                       style={{ fontSize: 20, flexGrow: 2, height: 45 }}
@@ -430,6 +437,7 @@ export default class index extends Component {
                   <TextInput
                     ref="3"
                     autoCorrect={false}
+                    editable={(this.state.loading) ? false : true}
                     keyboardType="numeric"
                     maxLength={4}
                     // secureTextEntry={true}

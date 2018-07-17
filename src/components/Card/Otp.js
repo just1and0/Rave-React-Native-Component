@@ -19,7 +19,7 @@ export default class OtpModal extends Component {
         }}>
         <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: "rgba(0,0,0,.7)" }}>
             <View style={{ backgroundColor: "white", borderTopWidth: 5, borderTopColor:"#12122D", width: "90%", maxWidth: 400, paddingVertical: 40, paddingHorizontal:50}}>
-              <Text style={{ textAlign: "center" }}>Please enter the OTP sent to your phone</Text>
+              <Text style={{ textAlign: "center" }}>{this.props.chargeResponseMessage}</Text>
 
 
               <View style={styles.formGroup}>
