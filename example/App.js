@@ -1,5 +1,5 @@
 import React from 'react';
-import Rave, {verifyTransaction} from 'react-native-rave';
+import Rave from './../Rave.js';
 
 export default class App extends React.Component {
 

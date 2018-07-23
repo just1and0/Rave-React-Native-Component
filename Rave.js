@@ -87,10 +87,3 @@ const styles = StyleSheet.create({
     alignItems: 'center'
   }
 });
-Rave
-
-let verifyTransaction = this.rave.verifyTransaction(txRef)
-
-export {
-  verifyTransaction
-}

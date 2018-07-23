@@ -5725,17 +5725,17 @@ react-native-maps@0.21.0:
     babel-plugin-module-resolver "^2.3.0"
     babel-preset-react-native "1.9.0"
 
-"react-native-rave-networking@https://github.com/kingflamez/react-native-rave-networking":
-  version "1.0.3"
-  resolved "https://github.com/kingflamez/react-native-rave-networking#36a488a58a4139da9afa3395ef0d1e4b4e9c3234"
+react-native-rave-networking@^1.0.4:
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/react-native-rave-networking/-/react-native-rave-networking-1.0.4.tgz#1487c5cde18daf1354b28fbec4da2c56d6919253"
   dependencies:
     md5 "^2.2.1"
     node-forge "^0.7.5"
     utf8 "^3.0.0"
 
 "react-native-rave@https://github.com/kingflamez/Rave-React-Native-Component":
-  version ""
-  resolved "https://github.com/kingflamez/Rave-React-Native-Component#836091932907af8845df488a5b3da7c20c0d0bba"
+  version "0.0.1"
+  resolved "https://github.com/kingflamez/Rave-React-Native-Component#ce41b016e9d73c74f705984a0c2dd18746d8f010"
   dependencies:
     card-validator "^5.0.0"
     crypto-js "^3.1.9-1"
@@ -5747,7 +5747,7 @@ react-native-maps@0.21.0:
     react "16.3.1"
     react-native "~0.55.2"
     react-native-keyboard-aware-scroll-view "^0.6.0"
-    react-native-rave-networking "https://github.com/kingflamez/react-native-rave-networking"
+    react-native-rave-networking "^1.0.4"
     utf8 "^3.0.0"
 
 react-native-safe-module@^1.1.0:
