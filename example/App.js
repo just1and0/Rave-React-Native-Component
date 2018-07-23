@@ -1,5 +1,5 @@
 import React from 'react';
-import Rave from 'react-native-rave';
+import Rave, {verifyTransaction} from 'react-native-rave';
 
 export default class App extends React.Component {
 
@@ -14,6 +14,7 @@ export default class App extends React.Component {
 
   onSuccess(data) {
     console.log("success", data);
+
   }
 
   onFailure(data) {

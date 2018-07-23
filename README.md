@@ -42,7 +42,7 @@ render() {
 | amount      |  This is the amount to be charged from card/account | `String` | Required
 | email      |  This is the email of the customer | `String` | Required
 | firstname      |  This is the firstname of the customer | `String` | Required
-| lastname      |  This is the lastname of the customer | `String` | Required(https://ravesandbox.flutterwave.com/dashboard/settings/apis) dashboard | `String` | Required
+| lastname      |  This is the lastname of the customer | `String` | Required
 | onSuccess      |  This is the function that receives data for a successful transaction | `Function` | Required
 | onFailure      |  This is the function that receives data for a failed transaction | `Function` | Required
 | country      |  This is the country you are transacting from eg. NG, GH, KE, ZA | `String` | Not Required (defaults to NG)
