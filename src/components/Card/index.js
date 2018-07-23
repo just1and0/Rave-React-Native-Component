@@ -102,7 +102,6 @@ export default class index extends Component {
 
     //validate with otp
     this.props.rave.validateWithOTP({ transaction_reference: this.state.flwRef, otp: this.state.otp }).then((res) => {
-
       if (res.data.tx.status.toUpperCase() === "SUCCESSFUL") {
         this.setState({
           loading: false
@@ -265,7 +264,7 @@ export default class index extends Component {
     if(this.check()) {
       Alert.alert(
         '',
-        'You will be charged a total of '+this.state.amount+'NGN. Do you want to continue?',
+        'You will be charged a total of '+this.props.amount+'NGN. Do you want to continue?',
         [
           { text: 'Cancel', style: 'cancel' },
           {
@@ -278,11 +277,31 @@ export default class index extends Component {
   }
 
   render() {
+
+    const styles = StyleSheet.create({
+      container: {
+        paddingHorizontal: 25,
+        marginTop: 40,
+        paddingBottom: 50,
+        height: '100%'
+      },
+      label: {
+        color: "#ACACAC"
+      },
+      input: {
+        borderBottomWidth: 2,
+        borderBottomColor: this.props.secondarycolor
+      },
+      formGroup: {
+        marginBottom: 20
+      }
+    });
+    
     let card = <Image source={require('../../assets/icons/cardnull.png')} />;
 
     var numberValidation = valid.number(this.state.cardno);
 
-    let btnText = <Text style={{ fontSize: 13, textAlign: "center", fontWeight: "bold", color:"#12122D" }}>PAY</Text>;
+    let btnText = <Text style={{ fontSize: 13, textAlign: "center", fontWeight: "bold", color:this.props.secondarycolor }}>PAY</Text>;
 
     if (!numberValidation.isPotentiallyValid) {
       card = <Image source={require('../../assets/icons/cardnull.png')} />;
@@ -303,15 +322,15 @@ export default class index extends Component {
 
     if (this.state.loading) {
 
-      btnText = <ActivityIndicator size="small" color="#12122D" />
+      btnText = <ActivityIndicator size="small" color={this.props.secondarycolor} />
         
     }
 
     return (
-      <KeyboardAwareScrollView style={styles.container}>
-        <Pin pinModal={this.state.pinModal} confirm={this.confirmPin} pin={this.state.pin} pinEdit={(pin) => this.setState({ pin })} />
-        <Otp otpModal={this.state.otpModal} confirm={this.confirmOtp} otp={this.state.otp} chargeResponseMessage={this.state.chargeResponseMessage} otpEdit={(otp) => this.setState({ otp })} />
-        <IntlModal intlModal={this.state.intlModal} confirm={this.confirmIntl} />
+      <KeyboardAwareScrollView style={styles.container} keyboardShouldPersistTaps='always'>
+        <Pin primarycolor={this.props.primarycolor} secondarycolor={this.props.secondarycolor} pinModal={this.state.pinModal} confirm={this.confirmPin} pin={this.state.pin} pinEdit={(pin) => this.setState({ pin })} />
+        <Otp primarycolor={this.props.primarycolor} secondarycolor={this.props.secondarycolor} otpModal={this.state.otpModal} confirm={this.confirmOtp} otp={this.state.otp} chargeResponseMessage={this.state.chargeResponseMessage} otpEdit={(otp) => this.setState({ otp })} />
+        <IntlModal primarycolor={this.props.primarycolor} secondarycolor={this.props.secondarycolor} intlModal={this.state.intlModal} confirm={this.confirmIntl} />
         <VBVSecure vbvModal={this.state.vbvModal} url={this.state.vbvurl} confirm={this.confirmVBV} />
         <View style={{flex:1}}>
           <View style={styles.formGroup}>
@@ -455,7 +474,7 @@ export default class index extends Component {
         </View>
 
         <TouchableOpacity onPress={this.pay} style={{ width: "100%", marginTop: 25 }} disabled={(this.state.loading == false)? false : true}>
-          <View style={{ backgroundColor: "#F5A623", paddingVertical: 15, borderRadius: 5, opacity:(this.state.loading == false) ? 1 : 0.6 }}>
+          <View style={{ backgroundColor: this.props.primarycolor, paddingVertical: 15, borderRadius: 5, opacity:(this.state.loading == false) ? 1 : 0.6 }}>
             {btnText}
           </View>
         </TouchableOpacity>
@@ -463,23 +482,3 @@ export default class index extends Component {
     )
   }
 }
-
-
-const styles = StyleSheet.create({
-  container: {
-    paddingHorizontal: 25,
-    marginTop: 30,
-    paddingBottom: 50,
-    height: '100%'
-  },
-  label: {
-    color: "#ACACAC"
-  },
-  input: {
-    borderBottomWidth: 2,
-    borderBottomColor: "#12122D"
-  },
-  formGroup: {
-    marginBottom: 20
-  }
-});

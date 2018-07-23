@@ -67,11 +67,25 @@ export default class IntlModal extends Component {
 
 
   render() {
+    const styles = StyleSheet.create({
+      formGroup: {
+        marginTop: 20
+      },
+      label: {
+        color: "#ACACAC"
+      },
+      input: {
+        borderBottomWidth: 2,
+        borderBottomColor: this.props.secondarycolor
+      }
+    });
+    
     return (
       <Modal
         animationType="fade"
         transparent={true}
-        visible={this.props.intlModal}>
+        visible={this.props.intlModal}
+        onRequestClose={() => console.log()}>
         <ScrollView style={{ flex: 1, backgroundColor: "#fff" }}>
           <KeyboardAwareScrollView enableAutomaticScroll={true} extraHeight={180} style={{ backgroundColor: "white", width: "100%", paddingVertical: 60, paddingHorizontal: 30 }}>
           
@@ -160,7 +174,7 @@ export default class IntlModal extends Component {
 
 
             <TouchableOpacity onPress={this.submit} style={{ width: "100%", marginTop: 30 }}>
-              <View style={{ backgroundColor: "#F5A623", paddingVertical: 15, borderRadius: 5 }}>
+              <View style={{ backgroundColor: this.props.primarycolor, paddingVertical: 15, borderRadius: 5 }}>
                 <Text style={{ fontSize: 13, textAlign: "center", fontWeight: "bold" }}>ENTER</Text>
               </View>
             </TouchableOpacity>
@@ -171,15 +185,3 @@ export default class IntlModal extends Component {
   }
 }
 
-const styles = StyleSheet.create({
-  formGroup: {
-    marginTop: 20
-  },
-  label: {
-    color: "#ACACAC"
-  },
-  input: {
-    borderBottomWidth: 2,
-    borderBottomColor: "#12122D"
-  }
-});

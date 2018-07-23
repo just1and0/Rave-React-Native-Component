@@ -1,11 +1,13 @@
 import React from 'react'
-import encryption from './encryption';
-import Axios from 'axios';
+import RaveApi from 'react-native-rave-networking'
+
 
 export default class RavePayment {
-  constructor({ publicKey, secretKey, production = false, currency = "NGN", country = "NG", txRef = "txref-" + Date.now(), amount, email, firstname, lastname }) {
+  constructor({ publicKey, secretKey, production = false, currency = "NGN", country = "NG", txRef = "txref-" + Date.now(), amount, email, firstname, lastname, meta }) {
     var baseUrlMap = ["https://ravesandboxapi.flutterwave.com/", "https://api.ravepay.co/"]
     this.baseUrl = (production) ? baseUrlMap[1] : baseUrlMap[0];
+
+    this.rave = new RaveApi(publicKey, secretKey, production);
 
     this.getPublicKey = function () {
       return publicKey;
@@ -46,28 +48,38 @@ export default class RavePayment {
       payload.email = this.getEmail();
       payload.firstname = this.getFirstname();
       payload.lastname = this.getLastname();
+      payload.meta = meta;
 
       return new Promise((resolve, reject) => {
-        var client = encryption({ payload, secretkey: this.getSecretKey() });
-        Axios({
-          url: this.baseUrl + 'flwv3-pug/getpaidx/api/charge',
-          method: 'post',
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          },
-          data: {
-            PBFPubKey: this.getPublicKey(),
-            client,
-            alg: "3DES-24"
-          },
+        let res = this.rave.Card.charge(payload, true).then((response) => {
+
+          resolve(response);
+        }).catch((error) => {
+          reject(error);
         })
-          .then(function (response) {
-            resolve(response.data);
-          })
-          .catch(function (error) {
-            reject(error.response.data);
-          });
+      })
+    }
+
+
+    this.accountCharge = function (payload) {
+      //insert constant data
+      payload.PBFPubKey = this.getPublicKey();
+      payload.currency = this.getCurrency();
+      payload.country = this.getCountry();
+      payload.txRef = this.getTransactionReference();
+      payload.amount = this.getAmount();
+      payload.email = this.getEmail();
+      payload.firstname = this.getFirstname();
+      payload.lastname = this.getLastname();
+      payload.meta = meta;
+
+      return new Promise((resolve, reject) => {
+        let res = this.rave.Account.charge(payload, true).then((response) => {
+
+          resolve(response);
+        }).catch((error) => {
+          reject(error);
+        })
       })
     }
   }
@@ -76,6 +88,17 @@ export default class RavePayment {
 
     return new Promise((resolve, reject) => {
       this.charge(payload).then((response) => {
+        resolve(response);
+      }).catch((e) => {
+        reject(e);
+      })
+    })
+  }
+
+  initiateAccountcharge(payload) {
+
+    return new Promise((resolve, reject) => {
+      this.accountCharge(payload).then((response) => {
         resolve(response);
       }).catch((e) => {
         reject(e);
@@ -107,26 +130,26 @@ export default class RavePayment {
     })
   }
 
-  validateWithOTP({ transaction_reference, otp}) {    
+  validateWithOTP({ transaction_reference, otp }) {
     return new Promise((resolve, reject) => {
-      Axios({
-        url: this.baseUrl + 'flwv3-pug/getpaidx/api/validatecharge',
-        method: 'post',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        },
-        data: {
-          PBFPubKey: this.getPublicKey(),
-          transaction_reference,
-          otp
-        },
-      })
+      this.rave.Card.validate(otp, transaction_reference, true)
         .then(function (response) {
-          resolve(response.data);
+          resolve(response);
         })
         .catch(function (error) {
-          reject(error.response.data);
+          reject(error);
+        });
+    })
+  }
+
+  validateWithBankOTP({ transaction_reference, otp }) {
+    return new Promise((resolve, reject) => {
+      this.rave.Account.validate(otp, transaction_reference, true)
+        .then(function (response) {
+          resolve(response);
+        })
+        .catch(function (error) {
+          reject(error);
         });
     })
   }

@@ -17,7 +17,8 @@ export default class VBVSecure extends Component {
         animationType="fade"
         transparent={false}
         visible={this.props.vbvModal}
-        onRequestClose={() => console.log()}>
+        onRequestClose={() => console.log()}
+        >
 
         <WebView
           source={{uri: this.props.url}}
