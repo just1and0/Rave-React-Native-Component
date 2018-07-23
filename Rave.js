@@ -33,9 +33,9 @@ export default class Rave extends React.Component {
         page = <Account rave={this.rave} primarycolor={this.props.primarycolor} secondarycolor={this.props.secondarycolor} amount={this.props.amount} onSuccess={res => this.props.onSuccess(res)} onFailure={e => this.props.onFailure(e)} />;
       }
     } else if (this.props.paymenttype == 'account') {
-      page = <Account rave={this.rave} amount={this.props.amount} onSuccess={res => this.props.onSuccess(res)} onFailure={e => this.props.onFailure(e)} />;
+      page = <Account rave={this.rave} primarycolor={this.props.primarycolor} secondarycolor={this.props.secondarycolor} amount={this.props.amount} onSuccess={res => this.props.onSuccess(res)} onFailure={e => this.props.onFailure(e)} />;
     } else {
-      page = <Card rave={this.rave} amount={this.props.amount} onSuccess={res => this.props.onSuccess(res)} onFailure={e => this.props.onFailure(e)} />;
+      page = <Card rave={this.rave} primarycolor={this.props.primarycolor} secondarycolor={this.props.secondarycolor} amount={this.props.amount} onSuccess={res => this.props.onSuccess(res)} onFailure={e => this.props.onFailure(e)} />;
     }
 
     
