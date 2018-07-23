@@ -21,7 +21,6 @@
   "dependencies": {
     "expo": "^27.0.1",
     "react": "16.3.1",
-    "react-native": "~0.55.2",
-    "react-native-rave": "https://github.com/kingflamez/Rave-React-Native-Component"
+    "react-native": "~0.55.2"
   }
 }

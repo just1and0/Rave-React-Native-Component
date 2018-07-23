@@ -154,5 +154,15 @@ export default class RavePayment {
     })
   }
 
+  verifyTransaction(txRef) {
+    return new Promise((resolve, reject) => {
+      this.rave.Account.verify(txRef).then((response) => {
+        resolve(response);
+      }).catch((error) => {
+        reject(error);
+      })
+    })
+  }
+
 
 }

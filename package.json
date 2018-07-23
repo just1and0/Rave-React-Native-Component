@@ -2,6 +2,8 @@
   "name": "react-native-rave",
   "main": "Rave.js",
   "version": "0.0.1",
+  "author": "Oluwole Adebiyi, Tofunmi Kupoluyi",
+  "license": "MIT",
   "dependencies": {
     "card-validator": "^5.0.0",
     "crypto-js": "^3.1.9-1",
@@ -13,7 +15,7 @@
     "react": "16.3.1",
     "react-native": "~0.55.2",
     "react-native-keyboard-aware-scroll-view": "^0.6.0",
-    "react-native-rave-networking": "https://github.com/kingflamez/react-native-rave-networking",
+    "react-native-rave-networking": "^1.0.4",
     "utf8": "^3.0.0"
   }
 }

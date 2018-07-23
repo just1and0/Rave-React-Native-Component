@@ -58,7 +58,6 @@ Rave.propTypes = {
   email: PropTypes.string.isRequired,
   firstname: PropTypes.string.isRequired,
   lastname: PropTypes.string.isRequired,
-  narration: PropTypes.string,
   publickey: PropTypes.string.isRequired,
   secretkey: PropTypes.string.isRequired,
   txref: PropTypes.string,
@@ -89,3 +88,9 @@ const styles = StyleSheet.create({
   }
 });
 Rave
+
+let verifyTransaction = this.rave.verifyTransaction(txRef)
+
+export {
+  verifyTransaction
+}
