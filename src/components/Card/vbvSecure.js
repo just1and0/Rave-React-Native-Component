@@ -21,6 +21,7 @@ export default class VBVSecure extends Component {
 
         <WebView
           source={{uri: this.props.url}}
+          scalesPageToFit={false}
           style={{marginTop: 80, padding: 50}}
           javaScriptEnabled={true}
           injectedJavaScript={"window.postMessage(document.getElementsByTagName('BODY')[0].innerHTML)"}

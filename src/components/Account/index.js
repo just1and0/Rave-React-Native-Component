@@ -61,7 +61,11 @@ export default class index extends Component {
         this.setState({
           loading: false
         })
-        this.props.onSuccess(res);
+        this.props.rave.verifyTransaction(res.data.txRef).then((resp) => {
+          this.props.onSuccess(resp);
+        }).catch((error) => {
+          this.props.onFailure(error);
+        })
       }
     }).catch((e) => {
       this.setState({
@@ -84,7 +88,11 @@ export default class index extends Component {
     }
 
     else {
-      this.props.onSuccess(data);
+      this.props.rave.verifyTransaction(data.txRef).then((resp) => {
+        this.props.onSuccess(resp);
+      }).catch((error) => {
+        this.props.onFailure(error);
+      })
     }
   }
 
@@ -153,13 +161,16 @@ export default class index extends Component {
 
     this.props.rave.initiateAccountcharge(payload).then((res) => {
       // Check for suggested auth
-      console.log("first",res);
 
       if (res.data.status.toUpperCase() === "SUCCESSFUL") {
         this.setState({
           loading: false
         })
-        this.props.onSuccess(res);
+        this.props.rave.verifyTransaction(res.data.txRef).then((resp) => {
+          this.props.onSuccess(resp);
+        }).catch((error) => {
+          this.props.onFailure(error);
+        })
       }
       else if (res.data.chargeResponseCode === "02" && res.data.authurl.toUpperCase() === "NO-URL") {
         this.setState({

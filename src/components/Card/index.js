@@ -84,7 +84,14 @@ export default class index extends Component {
         this.setState({
           loading: false
         })
-        this.props.onSuccess(response);
+        this.props.rave.verifyTransaction(response.data.txRef).then((resp) => {
+          console.log(resp);
+          this.props.onSuccess(resp);
+        }).catch((error) => {
+          console.log(error);
+          this.props.onFailure(error);
+        })
+        
       }
       }).catch((e) => {
         this.setState({
@@ -106,7 +113,14 @@ export default class index extends Component {
         this.setState({
           loading: false
         })
-        this.props.onSuccess(res);
+        
+        this.props.rave.verifyTransaction(res.data.tx.txRef).then((resp) => {
+          console.log(resp);
+          this.props.onSuccess(resp);
+        }).catch((error) => {
+          console.log(error);
+          this.props.onFailure(error);
+        })
       }
     }).catch((e) => {
         this.setState({
@@ -123,13 +137,20 @@ export default class index extends Component {
       vbvModal: false,
       loading: false
     })
-    
+
     if (err) {
       this.props.onFailure(data);
     }
+    
 
     else {
-      this.props.onSuccess(data);
+      this.props.rave.verifyTransaction(data.txRef).then((resp) => {
+        console.log(resp);
+        this.props.onSuccess(resp);
+      }).catch((error) => {
+        console.log(error);
+        this.props.onFailure(error);
+      })
     }
   }
 
@@ -155,6 +176,14 @@ export default class index extends Component {
         if (response.data.authModelUsed.toUpperCase() === "VBVSECURECODE") {
           this.setState({ vbvModal: true, vbvurl: response.data.authurl });
         }
+      } else {
+        this.props.rave.verifyTransaction(response.data.txRef).then((resp) => {
+          console.log(resp);
+          this.props.onSuccess(resp);
+        }).catch((error) => {
+          console.log(error);
+          this.props.onFailure(error);
+        })
       }
 
       }).catch((e) => {
@@ -229,7 +258,13 @@ export default class index extends Component {
           this.setState({
             loading: false
           })
-          this.props.onSuccess(res);
+          this.props.rave.verifyTransaction(res.data.txRef).then((resp) => {
+            console.log(resp);
+            this.props.onSuccess(resp);
+          }).catch((error) => {
+            console.log(error);
+            this.props.onFailure(error);
+          })
           
         } else if (res.data.chargeResponseCode === "02") {
           if (res.data.authModelUsed.toUpperCase() === "ACCESS_OTP" || res.data.authModelUsed.toUpperCase() === "GTB_OTP") {

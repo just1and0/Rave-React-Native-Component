@@ -30,7 +30,21 @@ import Rave from 'react-native-rave';
 ```javascript
 render() {
   return (
-    <Rave amount="500" country="NG" currency="NGN" email="flamekeed@gmail.com" firstname="Oluwole" lastname="Adebiyi" publickey="FLWPUBK-8ba286388b24dbd6c20706def0b4ea23-X" secretkey="FLWSECK-c45e0f704619e673263844e584bba013-X" txref="cs3762jhj" paymenttype="card" meta={[{ metaname: "color", metavalue: "red" }, { metaname: "storelocation", metavalue: "ikeja" }]} production={false} onSuccess={res => this.onSuccess(res)} onFailure={e => this.onFailure(e)} />
+    <Rave 
+        amount="500" 
+        country="NG" 
+        currency="NGN" 
+        email="test@mail.com" 
+        firstname="Oluwole" 
+        lastname="Adebiyi" 
+        publickey="FLWPUBK-8ba286388b24dbd6c20706def0b4ea23-X" 
+        secretkey="FLWSECK-c45e0f704619e673263844e584bba013-X"
+        paymenttype="both"
+        meta={[{ metaname: "color", metavalue: "red" }, { metaname: "storelocation", metavalue: "ikeja" }]}
+        production={false} 
+        onSuccess={res => this.onSuccess(res)} 
+        onFailure={e => this.onFailure(e)}
+        />
   );
 }
 ```
@@ -52,6 +66,6 @@ render() {
 | secondarycolor      |  This is to override the secondary colour of the component | `String` | Not Required
 | paymenttype      |  This is the payment type ['both','card', 'account'] | `String` | Not Required ('defaults to both')
 | production      |   Set to `true` if you want your transactions to run in the production environment otherwise set to `false`. Defaults to false  | `Boolean` | Not Required ('defaults to false')
-| meta      |  This is additional information that can be sent to the server eg [{ metaname: "color", metavalue: "red" }, { metaname: "storelocation", metavalue: "ikeja" }]  | `Boolean` | Not Required
+| meta      |  This is additional information that can be sent to the server eg [{ metaname: "color", metavalue: "red" }, { metaname: "storelocation", metavalue: "ikeja" }]  | `Array of Objects` | Not Required
 
 3. 

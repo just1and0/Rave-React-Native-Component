@@ -5734,8 +5734,8 @@ react-native-rave-networking@^1.0.4:
     utf8 "^3.0.0"
 
 "react-native-rave@https://github.com/kingflamez/Rave-React-Native-Component":
-  version "0.0.1"
-  resolved "https://github.com/kingflamez/Rave-React-Native-Component#ce41b016e9d73c74f705984a0c2dd18746d8f010"
+  version "0.0.2"
+  resolved "https://github.com/kingflamez/Rave-React-Native-Component#49486c0ccd1e144481888c9eb160f82be1b87da2"
   dependencies:
     card-validator "^5.0.0"
     crypto-js "^3.1.9-1"
