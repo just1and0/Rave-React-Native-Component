@@ -25,7 +25,26 @@ You can pull in react-native-paystack via npm:
 import Rave from 'react-native-rave';
 ```
 
-2. Use component with the props
+2. Set your success and failure methods
+
+```javascript
+ constructor(props) {
+    super(props);
+    this.onSuccess = this.onSuccess.bind(this);
+    this.onFailure = this.onFailure.bind(this);
+  }
+
+  onSuccess(data) {
+    console.log("success", data);
+
+  }
+
+  onFailure(data) {
+    console.log("error", data);
+  }
+```
+
+3. Use component with the props
 
 ```javascript
 render() {

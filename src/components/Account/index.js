@@ -83,16 +83,15 @@ export default class index extends Component {
       loading: false
     })
 
-    if (err) {
-      this.props.onFailure(data);
-    }
-
-    else {
+    if (data.status == "successful") {
       this.props.rave.verifyTransaction(data.txRef).then((resp) => {
         this.props.onSuccess(resp);
       }).catch((error) => {
         this.props.onFailure(error);
       })
+    }
+    else {
+      this.props.onFailure(data);
     }
   }
 
@@ -161,7 +160,6 @@ export default class index extends Component {
 
     this.props.rave.initiateAccountcharge(payload).then((res) => {
       // Check for suggested auth
-
       if (res.data.status.toUpperCase() === "SUCCESSFUL") {
         this.setState({
           loading: false

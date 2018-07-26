@@ -85,10 +85,8 @@ export default class index extends Component {
           loading: false
         })
         this.props.rave.verifyTransaction(response.data.txRef).then((resp) => {
-          console.log(resp);
           this.props.onSuccess(resp);
         }).catch((error) => {
-          console.log(error);
           this.props.onFailure(error);
         })
         
@@ -115,10 +113,8 @@ export default class index extends Component {
         })
         
         this.props.rave.verifyTransaction(res.data.tx.txRef).then((resp) => {
-          console.log(resp);
           this.props.onSuccess(resp);
         }).catch((error) => {
-          console.log(error);
           this.props.onFailure(error);
         })
       }
@@ -138,19 +134,15 @@ export default class index extends Component {
       loading: false
     })
 
-    if (err) {
-      this.props.onFailure(data);
-    }
-    
-
-    else {
+    if (data.status == "successful") {
       this.props.rave.verifyTransaction(data.txRef).then((resp) => {
-        console.log(resp);
         this.props.onSuccess(resp);
       }).catch((error) => {
-        console.log(error);
         this.props.onFailure(error);
       })
+    }
+    else {
+      this.props.onFailure(data);
     }
   }
 
@@ -178,10 +170,8 @@ export default class index extends Component {
         }
       } else {
         this.props.rave.verifyTransaction(response.data.txRef).then((resp) => {
-          console.log(resp);
           this.props.onSuccess(resp);
         }).catch((error) => {
-          console.log(error);
           this.props.onFailure(error);
         })
       }
@@ -259,10 +249,8 @@ export default class index extends Component {
             loading: false
           })
           this.props.rave.verifyTransaction(res.data.txRef).then((resp) => {
-            console.log(resp);
             this.props.onSuccess(resp);
           }).catch((error) => {
-            console.log(error);
             this.props.onFailure(error);
           })
           

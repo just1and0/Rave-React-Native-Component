@@ -21,15 +21,19 @@ export default class VBVSecure extends Component {
 
         <WebView
           source={{ uri: this.props.url }}
-          scalesPageToFit={false}
+          // scalesPageToFit={false}
           style={{ marginTop: 80, padding: 50 }}
           javaScriptEnabled={true}
-          injectedJavaScript={"window.postMessage(document.getElementsByTagName('BODY')[0].innerHTML)"}
+          injectedJavaScript={" setTimeout(function(){ window.postMessage(document.getElementsByTagName('BODY')[0].innerHTML, '*'); },1000); "}
           onMessage={(message) => {
+
             let returnedMessage = message.nativeEvent.data;
+
             // Attempt to parse a json
             try {
+
               let returnedJson = JSON.parse(returnedMessage);
+
               // first parameter indicates whether there was an error
               this.props.confirm(false, returnedJson);
             } catch (e) {

@@ -6,8 +6,6 @@ export default class App extends React.Component {
 
   constructor(props) {
     super(props);
-    this.state = { page: 'card' };
-    // this.onPressLearnMore = this.onPressLearnMore.bind(this);
     this.onSuccess = this.onSuccess.bind(this);
     this.onFailure = this.onFailure.bind(this);
   }

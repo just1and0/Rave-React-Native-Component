@@ -5733,22 +5733,18 @@ react-native-rave-networking@^1.0.4:
     node-forge "^0.7.5"
     utf8 "^3.0.0"
 
-"react-native-rave@https://github.com/kingflamez/Rave-React-Native-Component":
-  version "0.0.2"
-  resolved "https://github.com/kingflamez/Rave-React-Native-Component#49486c0ccd1e144481888c9eb160f82be1b87da2"
+react-native-rave@^0.0.3:
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/react-native-rave/-/react-native-rave-0.0.3.tgz#d982a17e40e41ff0edf202722fa949bafa20f756"
   dependencies:
     card-validator "^5.0.0"
-    crypto-js "^3.1.9-1"
     dateformat "^3.0.3"
-    md5 "^2.2.1"
     native-base "^2.7.2"
-    node-forge "^0.7.5"
     prop-types "^15.6.2"
     react "16.3.1"
     react-native "~0.55.2"
     react-native-keyboard-aware-scroll-view "^0.6.0"
     react-native-rave-networking "^1.0.4"
-    utf8 "^3.0.0"
 
 react-native-safe-module@^1.1.0:
   version "1.2.0"
