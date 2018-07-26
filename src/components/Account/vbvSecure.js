@@ -7,7 +7,7 @@ export default class VBVSecure extends Component {
   constructor(props) {
     super(props);
     this.numberOfPageLoads = 0;
-    this.maxPageLoads = this.props.maxPageLoads || 3;
+    this.maxPageLoads = this.props.maxPageLoads || 5;
   }
 
 
