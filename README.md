@@ -56,8 +56,8 @@ render() {
         email="test@mail.com" 
         firstname="Oluwole" 
         lastname="Adebiyi" 
-        publickey="FLWPUBK-8ba286388b24dbd6c20706def0b4ea23-X" 
-        secretkey="FLWSECK-c45e0f704619e673263844e584bba013-X"
+        publickey="FLWPUBK-**************************-X" 
+        secretkey="FLWSECK-**************************-X"
         paymenttype="both"
         meta={[{ metaname: "color", metavalue: "red" }, { metaname: "storelocation", metavalue: "ikeja" }]}
         production={false} 
@@ -87,4 +87,3 @@ render() {
 | production      |   Set to `true` if you want your transactions to run in the production environment otherwise set to `false`. Defaults to false  | `Boolean` | Not Required ('defaults to false')
 | meta      |  This is additional information that can be sent to the server eg [{ metaname: "color", metavalue: "red" }, { metaname: "storelocation", metavalue: "ikeja" }]  | `Array of Objects` | Not Required
 
-3. 
