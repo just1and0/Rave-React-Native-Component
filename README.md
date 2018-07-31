@@ -9,7 +9,7 @@
 
 [Yarn](https://yarnpkg.com/lang/en/docs/install/) or [Node](http://hhvm.com)
 
-You can pull in react-native-paystack via npm:
+You can pull in react-native-rave via npm:
 
 > npm install react-native-rave --save
 
