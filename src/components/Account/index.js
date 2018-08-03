@@ -1,46 +1,40 @@
 import React, { Component } from 'react';
-import { StyleSheet, View, Text, Alert, TextInput, ActivityIndicator, TouchableOpacity, Image } from 'react-native';
+import { StyleSheet, View, Text, Alert, TextInput, ActivityIndicator, TouchableOpacity, KeyboardAvoidingView } from 'react-native';
 import { Picker, DatePicker } from "native-base";
 //Scrollable view Library
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import { getBankList } from 'react-native-rave-networking';
 import dateFormat from 'dateformat';
-// Import the Pin Modal
-// import Pin from './Pin';
 
-//Import the OTP modal
-import Otp from './Otp';
-import VBVSecure from './vbvSecure';
-// import IntlModal from './Intl';
-
-var valid = require('card-validator');
-
-
+import Otp from '../General/Otp';
+import VBVSecure from '../General/vbvSecure';
 
 
 export default class index extends Component {
   constructor(props) {
     super(props);
 
-    this.state = { dob: '', selectedDate: false, banks: [], accountbank: '', accountnumber: '', phonenumber: '', status: "", chargeResponseMessage: '', suggested_auth: "", vbvModal: false, vbvurl: '', dobErr:'none', accountbankErr: 'none', accountnumberErr: 'none', phonenumberErr: 'none', otp: "", flwRef: "", otpModal: false, loading: false, otp: "" };
+    this.state = { dob: '', selectedDate: false, banks: [], accountbank: '', accountnumber: '', phonenumber: (this.props.phone == null) ? '' : this.props.phone, status: "", chargeResponseMessage: '', suggested_auth: "", vbvModal: false, vbvurl: '', dobErr: 'none', accountbankErr: 'none', accountnumberErr: 'none', phonenumberErr: 'none', otp: "", flwRef: "", otpModal: false, loading: false, otp: "", phone: (this.props.phone == null) ? '' : this.props.phone };
 
     this.confirmOtp = this.confirmOtp.bind(this);
     this.pay = this.pay.bind(this);
     this.check = this.check.bind(this);
+    this.mounted = false;
     this.confirmVBV = this.confirmVBV.bind(this);
   }
 
   componentDidMount() {
+    this.mounted = true;
     let banks;
-    getBankList().then((response) => {
+    this.props.rave.listBanks().then((response) => {
+      
       banks = response.map((bank) => {
         return (
           <Picker.Item key={bank.bankcode} label={bank.bankname} value={bank.bankcode} />
         )
       })
-      // if (this._isMounted) {
-        this.setState({ banks })
-      // }
+      if (this.mounted) {
+        this.setState({ banks, accountbank: response[0].bankcode })
+      }
     }).catch((e) => {
       console.log(e);
 
@@ -48,6 +42,9 @@ export default class index extends Component {
     
   }
   
+  componentWillUnmount() {
+    this.mounted = false;
+  }
   
   //This closes the otp modal and makes the otp validate
   confirmOtp() {
@@ -56,7 +53,7 @@ export default class index extends Component {
     })
 
     //validate with otp
-    this.props.rave.validateWithBankOTP({ transaction_reference: this.state.flwRef, otp: this.state.otp }).then((res) => {
+    this.props.rave.validateAccount({ transactionreference: this.state.flwRef, otp: this.state.otp }).then((res) => {      
       if (res.data.status.toUpperCase() === "SUCCESSFUL") {
         this.setState({
           loading: false
@@ -66,6 +63,11 @@ export default class index extends Component {
         }).catch((error) => {
           this.props.onFailure(error);
         })
+      } else {
+        this.setState({
+          loading: false
+        })
+        this.props.onFailure(res);
       }
     }).catch((e) => {
       this.setState({
@@ -142,11 +144,13 @@ export default class index extends Component {
     this.setState({
       loading: true
     })
+    
     // Initiate the charge
     let payload = {
       "accountbank": this.state.accountbank,// get the bank code from the bank list endpoint.
       "accountnumber": this.state.accountnumber,
-      "phonenumber": this.state.phonenumber
+      "phonenumber": this.state.phonenumber,
+      "payment_type": "account"
     }
 
     if (this.state.accountbank == "057") {
@@ -154,11 +158,12 @@ export default class index extends Component {
         "accountbank": this.state.accountbank,// get the bank code from the bank list endpoint.
         "accountnumber": this.state.accountnumber,
         "phonenumber": this.state.phonenumber,
-        "passcode": dateFormat(this.state.dob, "ddmmyyyy")
+        "passcode": dateFormat(this.state.dob, "ddmmyyyy"),
+        "payment_type": "account"
       }
     }
 
-    this.props.rave.initiateAccountcharge(payload).then((res) => {
+    this.props.rave.initiatecharge(payload).then((res) => {
       // Check for suggested auth
       if (res.data.status.toUpperCase() === "SUCCESSFUL") {
         this.setState({
@@ -195,18 +200,33 @@ export default class index extends Component {
   // The Pay button handler
   pay() {
     if (this.check()) {
-      Alert.alert(
-        '',
-        'You will be charged a total of ' + this.props.amount + 'NGN. Do you want to continue?',
-        [
-          { text: 'Cancel', style: 'cancel' },
-          {
-            text: 'Yes', onPress: () => this.charge()
-            
-          },
-        ],
-        { cancelable: false }
-      )
+      this.setState({
+        loading: true
+      })
+
+      this.props.rave.getAccountFees({ amount: this.props.amount, currency: this.props.currency }).then((resp) => {
+
+        Alert.alert(
+          '',
+          'You will be charged a total of' + this.props.currency + resp.data.charge_amount + '. Do you want to continue?',
+          [
+            {
+              text: 'Cancel', onPress: () => this.setState({
+                loading: false
+              }) },
+            {
+              text: 'Yes', onPress: () => this.charge()
+            },
+          ],
+          { cancelable: false }
+        )
+
+      }).catch((err) => {
+        this.setState({
+          loading: false
+        })
+        this.props.onFailure(err);
+      })
     }
   }
 
@@ -267,51 +287,51 @@ export default class index extends Component {
     }
 
     return (
-      <KeyboardAwareScrollView style={styles.container}>
-        <Otp primarycolor={this.props.primarycolor} secondarycolor={this.props.secondarycolor} otpModal={this.state.otpModal} confirm={this.confirmOtp} otp={this.state.otp} chargeResponseMessage={this.state.chargeResponseMessage} otpEdit={(otp) => this.setState({ otp })} />
-        <VBVSecure vbvModal={this.state.vbvModal} url={this.state.vbvurl} confirm={this.confirmVBV} />
-        <View style={{ flex: 1 }}>
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>Phone Number</Text>
-            <View style={styles.input}>
-              <View style={{ paddingVertical: 10, flexDirection: 'row' }}>
-                <TextInput
-                  autoCorrect={false}
-                  editable={(this.state.loading) ? false : true}
-                  keyboardType="phone-pad"
-                  style={{ fontSize: 20, paddingHorizontal: 10, minWidth: "100%" }}
-                  underlineColorAndroid='rgba(0,0,0,0)'
-                  onChangeText={(phonenumber) => this.setState({phonenumber})}
-                  value={this.state.phonenumber}
-                />
+      <KeyboardAvoidingView style={styles.container} behavior="padding" enabled>
+        <KeyboardAwareScrollView keyboardShouldPersistTaps='always'>
+          <Otp primarycolor={this.props.primarycolor} secondarycolor={this.props.secondarycolor} otpModal={this.state.otpModal} confirm={this.confirmOtp} otp={this.state.otp} chargeResponseMessage={this.state.chargeResponseMessage} otpEdit={(otp) => this.setState({ otp })} />
+          <VBVSecure vbvModal={this.state.vbvModal} url={this.state.vbvurl} confirm={this.confirmVBV} />
+          <View style={{ flex: 1 }}>
+            <View style={styles.formGroup}>
+              <Text style={styles.label}>Phone Number</Text>
+              <View style={styles.input}>
+                <View style={{ paddingVertical: 10, flexDirection: 'row' }}>
+                  <TextInput
+                    autoCorrect={false}
+                    editable={(this.state.loading) ? false : true}
+                    keyboardType="phone-pad"
+                    style={{ fontSize: 20, paddingHorizontal: 10, minWidth: "100%" }}
+                    underlineColorAndroid='rgba(0,0,0,0)'
+                    onChangeText={(phonenumber) => this.setState({phonenumber})}
+                    value={this.state.phonenumber}
+                  />
+                </View>
               </View>
+              <Text style={{ color: '#EE312A', fontSize: 10, display: this.state.phonenumberErr, fontWeight: 'bold', marginTop: 5 }}>Enter a valid phone number</Text>
             </View>
-            <Text style={{ color: '#EE312A', fontSize: 10, display: this.state.phonenumberErr, fontWeight: 'bold', marginTop: 5 }}>Enter a valid phone number</Text>
-          </View>
 
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>Account Number</Text>
-            <View style={styles.input}>
-              <View style={{ paddingVertical: 10, flexDirection: 'row' }}>
-                <TextInput
-                  autoCorrect={false}
-                  editable={(this.state.loading) ? false : true}
-                  keyboardType="numeric"
-                  style={{ fontSize: 20, paddingHorizontal: 10, minWidth: "100%" }}
-                  underlineColorAndroid='rgba(0,0,0,0)'
-                  maxLength={10}
-                  onChangeText={(accountnumber) => this.setState({ accountnumber })}
-                  value={this.state.accountnumber}
-                />
+            <View style={styles.formGroup}>
+              <Text style={styles.label}>Account Number</Text>
+              <View style={styles.input}>
+                <View style={{ paddingVertical: 10, flexDirection: 'row' }}>
+                  <TextInput
+                    autoCorrect={false}
+                    editable={(this.state.loading) ? false : true}
+                    keyboardType="numeric"
+                    style={{ fontSize: 20, paddingHorizontal: 10, minWidth: "100%" }}
+                    underlineColorAndroid='rgba(0,0,0,0)'
+                    maxLength={10}
+                    onChangeText={(accountnumber) => this.setState({ accountnumber })}
+                    value={this.state.accountnumber}
+                  />
+                </View>
               </View>
+              <Text style={{ color: '#EE312A', fontSize: 10, display: this.state.accountnumberErr, fontWeight: 'bold', marginTop: 5 }}>Enter a valid account number</Text>
             </View>
-            <Text style={{ color: '#EE312A', fontSize: 10, display: this.state.accountnumberErr, fontWeight: 'bold', marginTop: 5 }}>Enter a valid account number</Text>
-          </View>
 
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>Bank</Text>
-            <View style={styles.input}>
-              <View style={{ paddingVertical: 0, flexDirection: 'row' }}>
+            <View style={styles.formGroup}>
+              <Text style={styles.label}>Bank</Text>
+              <View style={styles.input}>
                 <Picker
                   mode="dropdown"
                   placeholder="Select Bank"
@@ -322,22 +342,22 @@ export default class index extends Component {
                   {this.state.banks}
                 </Picker>
               </View>
+              <Text style={{ color: '#EE312A', fontSize: 10, display: this.state.accountbankErr, fontWeight: 'bold', marginTop: 5 }}>Choose a bank</Text>
             </View>
-            <Text style={{ color: '#EE312A', fontSize: 10, display: this.state.accountbankErr, fontWeight: 'bold', marginTop: 5 }}>Choose a bank</Text>
+
+            
+            {zenith}
+            
+
           </View>
 
-          
-          {zenith}
-          
-
-        </View>
-
-        <TouchableOpacity onPress={this.pay} style={{ width: "100%", marginTop: 25 }} disabled={(this.state.loading == false) ? false : true}>
-          <View style={{ backgroundColor: this.props.primarycolor, paddingVertical: 15, borderRadius: 5, opacity: (this.state.loading == false) ? 1 : 0.6 }}>
-            {btnText}
-          </View>
-        </TouchableOpacity>
-      </KeyboardAwareScrollView>
+          <TouchableOpacity onPress={this.pay} style={{ width: "100%", marginTop: 25 }} disabled={(this.state.loading == false) ? false : true}>
+            <View style={{ backgroundColor: this.props.primarycolor, paddingVertical: 15, borderRadius: 5, opacity: (this.state.loading == false) ? 1 : 0.6 }}>
+              {btnText}
+            </View>
+          </TouchableOpacity>
+        </KeyboardAwareScrollView>
+      </KeyboardAvoidingView>
     )
   }
 }

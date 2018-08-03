@@ -1,13 +1,11 @@
 import React from 'react'
-import RaveApi from 'react-native-rave-networking'
-
+import encryption from './encryption';
+import Axios from 'axios';
 
 export default class RavePayment {
-  constructor({ publicKey, secretKey, production = false, currency = "NGN", country = "NG", txRef = "txref-" + Date.now(), amount, email, firstname, lastname, meta }) {
+  constructor({ publicKey, secretKey, production = false, currency = "NGN", country = "NG", txRef = "txref-" + Date.now(), amount, email, firstname, lastname }) {
     var baseUrlMap = ["https://ravesandboxapi.flutterwave.com/", "https://api.ravepay.co/"]
     this.baseUrl = (production) ? baseUrlMap[1] : baseUrlMap[0];
-
-    this.rave = new RaveApi(publicKey, secretKey, production);
 
     this.getPublicKey = function () {
       return publicKey;
@@ -48,57 +46,37 @@ export default class RavePayment {
       payload.email = this.getEmail();
       payload.firstname = this.getFirstname();
       payload.lastname = this.getLastname();
-      payload.meta = meta;
+      payload.redirect_url = "https://ravenative.herokuapp.com/";  
 
       return new Promise((resolve, reject) => {
-        let res = this.rave.Card.charge(payload, true).then((response) => {
+        var client = encryption({ payload, secretkey: this.getSecretKey() });
 
-          resolve(response);
-        }).catch((error) => {
-          reject(error);
+        Axios({
+          url: this.baseUrl + 'flwv3-pug/getpaidx/api/charge',
+          method: 'post',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          data: {
+            PBFPubKey: this.getPublicKey(),
+            client,
+            alg: "3DES-24"
+          },
         })
-      })
-    }
-
-
-    this.accountCharge = function (payload) {
-      //insert constant data
-      payload.PBFPubKey = this.getPublicKey();
-      payload.currency = this.getCurrency();
-      payload.country = this.getCountry();
-      payload.txRef = this.getTransactionReference();
-      payload.amount = this.getAmount();
-      payload.email = this.getEmail();
-      payload.firstname = this.getFirstname();
-      payload.lastname = this.getLastname();
-      payload.meta = meta;
-
-      return new Promise((resolve, reject) => {
-        let res = this.rave.Account.charge(payload, true).then((response) => {
-
-          resolve(response);
-        }).catch((error) => {
-          reject(error);
-        })
+          .then(function (response) {
+            resolve(response.data);
+          })
+          .catch(function (error) {
+            reject(error.response.data);
+          });
       })
     }
   }
 
   initiatecharge(payload) {
-
     return new Promise((resolve, reject) => {
       this.charge(payload).then((response) => {
-        resolve(response);
-      }).catch((e) => {
-        reject(e);
-      })
-    })
-  }
-
-  initiateAccountcharge(payload) {
-
-    return new Promise((resolve, reject) => {
-      this.accountCharge(payload).then((response) => {
         resolve(response);
       }).catch((e) => {
         reject(e);
@@ -130,37 +108,143 @@ export default class RavePayment {
     })
   }
 
-  validateWithOTP({ transaction_reference, otp }) {
+  validate({ transaction_reference, otp }) {
     return new Promise((resolve, reject) => {
-      this.rave.Card.validate(otp, transaction_reference, true)
-        .then(function (response) {
-          resolve(response);
-        })
-        .catch(function (error) {
-          reject(error);
-        });
-    })
-  }
-
-  validateWithBankOTP({ transaction_reference, otp }) {
-    return new Promise((resolve, reject) => {
-      this.rave.Account.validate(otp, transaction_reference, true)
-        .then(function (response) {
-          resolve(response);
-        })
-        .catch(function (error) {
-          reject(error);
-        });
-    })
-  }
-
-  verifyTransaction(txRef) {
-    return new Promise((resolve, reject) => {
-      this.rave.Card.verify(txRef).then((response) => {
-        resolve(response);
-      }).catch((error) => {
-        reject(error);
+      Axios({
+        url: this.baseUrl + 'flwv3-pug/getpaidx/api/validatecharge',
+        method: 'post',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        data: {
+          PBFPubKey: this.getPublicKey(),
+          transaction_reference,
+          otp
+        },
       })
+        .then(function (response) {
+          resolve(response.data);
+        })
+        .catch(function (error) {
+          reject(error.response.data);
+        });
+    })
+  }
+
+  validateAccount({ transactionreference, otp }) {
+    return new Promise((resolve, reject) => {
+      Axios({
+        url: this.baseUrl + 'flwv3-pug/getpaidx/api/validate',
+        method: 'post',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        data: {
+          PBFPubKey: this.getPublicKey(),
+          transactionreference,
+          otp
+        },
+      })
+        .then(function (response) {
+          resolve(response.data);
+        })
+        .catch(function (error) {
+          reject(error.response.data);
+        });
+    })
+  }
+
+  getCardFees({ amount, currency, card6 }) {
+    return new Promise((resolve, reject) => {
+      Axios({
+        url: this.baseUrl + 'flwv3-pug/getpaidx/api/fee',
+        method: 'post',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        data: {
+          PBFPubKey: this.getPublicKey(),
+          amount,
+          currency,
+          card6
+        },
+      })
+        .then(function (response) {
+          resolve(response.data);
+        })
+        .catch(function (error) {
+          reject(error.response.data);
+        });
+    })
+  }
+
+  getAccountFees({ amount, currency }) {
+    return new Promise((resolve, reject) => {
+      Axios({
+        url: this.baseUrl + 'flwv3-pug/getpaidx/api/fee',
+        method: 'post',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        data: {
+          PBFPubKey: this.getPublicKey(),
+          amount,
+          currency,
+          ptype: 2
+        },
+      })
+        .then(function (response) {
+          resolve(response.data);
+        })
+        .catch(function (error) {
+          reject(error.response.data);
+        });
+    })
+  }
+
+  verifyTransaction(txref) {
+    return new Promise((resolve, reject) => {
+      Axios({
+        url: this.baseUrl + 'flwv3-pug/getpaidx/api/v2/verify',
+        method: 'post',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        data: {
+          txref,
+          SECKEY: this.getSecretKey()
+        },
+      })
+        .then(function (response) {
+          resolve(response.data);
+        })
+        .catch(function (error) {
+          reject(error.response.data);
+        });
+    })
+  }
+
+  listBanks() {
+    return new Promise((resolve, reject) => {
+      Axios({
+        url: this.baseUrl + 'flwv3-pug/getpaidx/api/flwpbf-banks.js?json=1',
+        method: 'get',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        }
+      })
+        .then(function (response) {
+          resolve(response.data);
+        })
+        .catch(function (error) {
+          reject(error.response.data);
+        });
     })
   }
 

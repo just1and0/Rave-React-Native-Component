@@ -74,6 +74,7 @@ render() {
 | secretkey      |  This is the secretkey gotten from your [Live](https://rave.flutterwave.com/dashboard/settings/apis) or [Test]
 | amount      |  This is the amount to be charged from card/account | `String` | Required
 | email      |  This is the email of the customer | `String` | Required
+| phone      |  This is the phone number of the customer | `String` | Not Required
 | firstname      |  This is the firstname of the customer | `String` | Required
 | lastname      |  This is the lastname of the customer | `String` | Required
 | onSuccess      |  This is the function that receives data for a successful transaction | `Function` | Required

@@ -28,14 +28,14 @@ export default class Rave extends React.Component {
     if (this.props.paymenttype == 'both') {
       header = <HeaderContainer page={this.getPage} />;
       if (this.state.page == "card") {
-        page = <Card rave={this.rave} primarycolor={this.props.primarycolor} secondarycolor={this.props.secondarycolor} amount={this.props.amount} onSuccess={res => this.props.onSuccess(res)} onFailure={e => this.props.onFailure(e)} />;
+        page = <Card rave={this.rave} primarycolor={this.props.primarycolor} secondarycolor={this.props.secondarycolor} amount={this.props.amount} currency={this.props.currency} onSuccess={res => this.props.onSuccess(res)} onFailure={e => this.props.onFailure(e)} />;
       } else {
-        page = <Account rave={this.rave} primarycolor={this.props.primarycolor} secondarycolor={this.props.secondarycolor} amount={this.props.amount} onSuccess={res => this.props.onSuccess(res)} onFailure={e => this.props.onFailure(e)} />;
+        page = <Account rave={this.rave} primarycolor={this.props.primarycolor} phone={this.props.phone} secondarycolor={this.props.secondarycolor} amount={this.props.amount} currency={this.props.currency} onSuccess={res => this.props.onSuccess(res)} onFailure={e => this.props.onFailure(e)} />;
       }
     } else if (this.props.paymenttype == 'account') {
-      page = <Account rave={this.rave} primarycolor={this.props.primarycolor} secondarycolor={this.props.secondarycolor} amount={this.props.amount} onSuccess={res => this.props.onSuccess(res)} onFailure={e => this.props.onFailure(e)} />;
+      page = <Account rrave={this.rave} primarycolor={this.props.primarycolor} phone={this.props.phone} secondarycolor={this.props.secondarycolor} amount={this.props.amount} currency={this.props.currency} onSuccess={res => this.props.onSuccess(res)} onFailure={e => this.props.onFailure(e)} />;
     } else {
-      page = <Card rave={this.rave} primarycolor={this.props.primarycolor} secondarycolor={this.props.secondarycolor} amount={this.props.amount} onSuccess={res => this.props.onSuccess(res)} onFailure={e => this.props.onFailure(e)} />;
+      page = <Card rave={this.rave} primarycolor={this.props.primarycolor} secondarycolor={this.props.secondarycolor} amount={this.props.amount} currency={this.props.currency} onSuccess={res => this.props.onSuccess(res)} onFailure={e => this.props.onFailure(e)} />;
     }
 
     
@@ -61,6 +61,7 @@ Rave.propTypes = {
   publickey: PropTypes.string.isRequired,
   secretkey: PropTypes.string.isRequired,
   txref: PropTypes.string,
+  phone: PropTypes.string,
   primarycolor: PropTypes.string,
   secondarycolor: PropTypes.string, 
   paymenttype: PropTypes.string,
@@ -78,6 +79,7 @@ Rave.defaultProps = {
   secondarycolor: '#12122D',
   paymenttype: 'both',
   production: false,
+  phone: null,
   meta: []
 };
 

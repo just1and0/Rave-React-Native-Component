@@ -1,13 +1,13 @@
 import React, { Component } from 'react';
-import { StyleSheet, View, Text, Alert, TextInput, Modal, ActivityIndicator, TouchableOpacity, Image } from 'react-native';
+import { StyleSheet, View, Text, Alert, TextInput, KeyboardAvoidingView, ActivityIndicator, TouchableOpacity, Image } from 'react-native';
 //Scrollable view Library
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 // Import the Pin Modal
 import Pin from './Pin';
 
 //Import the OTP modal
-import Otp from './Otp';
-import VBVSecure from './vbvSecure';
+import Otp from '../General/Otp';
+import VBVSecure from '../General/vbvSecure';
 import IntlModal from './Intl';
 
 var valid = require('card-validator');
@@ -18,7 +18,7 @@ export default class index extends Component {
   constructor(props) {
     super(props);
     
-    this.state = { cardno: '', cvv: '', status: "", chargeResponseMessage: '', suggested_auth: "", vbvModal: false, vbvurl: '', cardnoErr: 'none', dateErr: 'none', cvvErr: 'none', expirymonth: '', expiryyear: '', amount: '500', firstname: 'Oluwole', lastname: 'Adebiyi', email: 'flamekeed@gmail.com', pin: "", pinModal: false, otp: "", flwRef: "", otpModal: false, intlModal: false, loading: false, otp: "", intl: {}};
+    this.state = { chargedAmount:0, cardno: '', cvv: '', status: "", chargeResponseMessage: '', suggested_auth: "", vbvModal: false, vbvurl: '', cardnoErr: 'none', dateErr: 'none', cvvErr: 'none', expirymonth: '', expiryyear: '', firstname: 'Oluwole', lastname: 'Adebiyi', email: 'flamekeed@gmail.com', pin: "", pinModal: false, otp: "", flwRef: "", otpModal: false, intlModal: false, loading: false, otp: "", intl: {}};
 
     this.cc_format = this.cc_format.bind(this);
     this.confirmPin = this.confirmPin.bind(this);
@@ -71,26 +71,32 @@ export default class index extends Component {
       "expiryyear": this.state.expiryyear,
       "pin": this.state.pin
     }).then((response) => {
-      if (response.data.chargeResponseCode === "02") {
-        //validate with otp
-        
-        this.setState({
-          chargeResponseMessage: response.data.chargeResponseMessage,
-          otpModal: true,
-          loading: true,
-          flwRef: response.data.flwRef
-        })
-      } else if (response.data.status.toUpperCase() === "SUCCESSFUL") {
-        this.setState({
-          loading: false
-        })
-        this.props.rave.verifyTransaction(response.data.txRef).then((resp) => {
-          this.props.onSuccess(resp);
-        }).catch((error) => {
-          this.props.onFailure(error);
-        })
-        
-      }
+        if (response.data.chargeResponseCode === "02") {
+          //validate with otp
+          
+          this.setState({
+            chargeResponseMessage: response.data.chargeResponseMessage,
+            otpModal: true,
+            loading: true,
+            flwRef: response.data.flwRef
+          })
+        } else if (response.data.status.toUpperCase() === "SUCCESSFUL") {
+          this.setState({
+            loading: false
+          })
+          this.props.rave.verifyTransaction(response.data.txRef).then((resp) => {
+            this.setState({ cardno: '', cvv: '', expirymonth: '', expiryyear: ''})
+            this.props.onSuccess(resp);
+          }).catch((error) => {
+            this.props.onFailure(error);
+          })
+          
+        } else {
+          this.setState({
+            loading: false
+          })
+          this.props.onFailure(response);
+        }
       }).catch((e) => {
         this.setState({
           loading: false
@@ -106,17 +112,24 @@ export default class index extends Component {
     })
 
     //validate with otp
-    this.props.rave.validateWithOTP({ transaction_reference: this.state.flwRef, otp: this.state.otp }).then((res) => {
+    this.props.rave.validate({ transaction_reference: this.state.flwRef, otp: this.state.otp }).then((res) => {
+      
       if (res.data.tx.status.toUpperCase() === "SUCCESSFUL") {
         this.setState({
           loading: false
         })
         
         this.props.rave.verifyTransaction(res.data.tx.txRef).then((resp) => {
+          this.setState({ cardno: '', cvv: '', expirymonth: '', expiryyear: '' })
           this.props.onSuccess(resp);
         }).catch((error) => {
           this.props.onFailure(error);
         })
+      } else {
+        this.setState({
+          loading: false
+        })
+        this.props.onFailure(res);
       }
     }).catch((e) => {
         this.setState({
@@ -136,6 +149,7 @@ export default class index extends Component {
 
     if (data.status == "successful") {
       this.props.rave.verifyTransaction(data.txRef).then((resp) => {
+        this.setState({ cardno: '', cvv: '', expirymonth: '', expiryyear: '' })
         this.props.onSuccess(resp);
       }).catch((error) => {
         this.props.onFailure(error);
@@ -170,6 +184,7 @@ export default class index extends Component {
         }
       } else {
         this.props.rave.verifyTransaction(response.data.txRef).then((resp) => {
+          this.setState({ cardno: '', cvv: '', expirymonth: '', expiryyear: '' })
           this.props.onSuccess(resp);
         }).catch((error) => {
           this.props.onFailure(error);
@@ -246,10 +261,17 @@ export default class index extends Component {
       } else {
         if (res.data.status.toUpperCase() === "SUCCESSFUL") {
           this.setState({
-            loading: false
+            loading: false,
+            flwRef: res.data.flwRef
           })
           this.props.rave.verifyTransaction(res.data.txRef).then((resp) => {
+            this.setState({
+              loading: false,
+              flwRef: res.data.flwRef,
+              cardno: '', cvv: '', expirymonth: '', expiryyear: ''
+            })
             this.props.onSuccess(resp);
+
           }).catch((error) => {
             this.props.onFailure(error);
           })
@@ -259,6 +281,7 @@ export default class index extends Component {
             this.setState({
               otpModal: true,
               loading: true,
+              flwRef: res.data.flwRef,
               chargeResponseMessage: res.data.chargeResponseMessage
             })
           } else if (res.data.authModelUsed.toUpperCase() === "PIN") {
@@ -269,6 +292,11 @@ export default class index extends Component {
           } else if (res.data.authModelUsed.toUpperCase() === "VBVSECURECODE") {
             this.setState({ vbvModal: true, vbvurl: res.data.authurl });
           }
+        } else {
+          this.setState({
+            loading: false
+          })
+          this.props.onFailure(res);
         }
       }
 
@@ -285,17 +313,36 @@ export default class index extends Component {
   // The Pay button handler
   pay() {
     if(this.check()) {
-      Alert.alert(
-        '',
-        'You will be charged a total of '+this.props.amount+'NGN. Do you want to continue?',
-        [
-          { text: 'Cancel', style: 'cancel' },
-          {
-            text: 'Yes', onPress: () => this.charge()
-          },
-        ],
-        { cancelable: false }
-      )
+
+      this.setState({
+        loading: true
+      })
+      
+      this.props.rave.getCardFees({ amount: this.props.amount, currency: this.props.currency, card6: this.state.cardno.replace(/\s/g, "").substr(0, 6) }).then((resp) => {
+
+        Alert.alert(
+          '',
+          'You will be charged a total of' + this.props.currency + resp.data.charge_amount + '. Do you want to continue?',
+          [
+            {
+              text: 'Cancel', onPress: () => this.setState({
+                loading: false
+              })
+            },
+            {
+              text: 'Yes', onPress: () => this.charge()
+            },
+          ],
+          { cancelable: false }
+        )
+
+      }).catch((err) => {
+        this.setState({
+          loading: false
+        })
+        this.props.onFailure(err);
+      })
+      
     }
   }
 
@@ -305,7 +352,7 @@ export default class index extends Component {
       container: {
         paddingHorizontal: 25,
         marginTop: 40,
-        paddingBottom: 50,
+        paddingBottom: 20,
         height: '100%'
       },
       label: {
@@ -350,158 +397,160 @@ export default class index extends Component {
     }
 
     return (
-      <KeyboardAwareScrollView style={styles.container} keyboardShouldPersistTaps='always'>
-        <Pin primarycolor={this.props.primarycolor} secondarycolor={this.props.secondarycolor} pinModal={this.state.pinModal} confirm={this.confirmPin} pin={this.state.pin} pinEdit={(pin) => this.setState({ pin })} />
-        <Otp primarycolor={this.props.primarycolor} secondarycolor={this.props.secondarycolor} otpModal={this.state.otpModal} confirm={this.confirmOtp} otp={this.state.otp} chargeResponseMessage={this.state.chargeResponseMessage} otpEdit={(otp) => this.setState({ otp })} />
-        <IntlModal primarycolor={this.props.primarycolor} secondarycolor={this.props.secondarycolor} intlModal={this.state.intlModal} confirm={this.confirmIntl} />
-        <VBVSecure vbvModal={this.state.vbvModal} url={this.state.vbvurl} confirm={this.confirmVBV} />
-        <View style={{flex:1}}>
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>Card Number</Text>
-            <View style={styles.input}>
-              <View style={{ paddingVertical: 10, flexDirection: 'row' }}>
-                <View style={{ paddingTop: 6 }}>
-                  {card}
-                </View>
-                <View>
-                  <TextInput
-                    autoCorrect={false}
-                    editable={(this.state.loading)?false:true}
-                    keyboardType="numeric"
-                    style={{ fontSize: 20, paddingHorizontal: 10, minWidth:"95%"}}
-                    underlineColorAndroid='rgba(0,0,0,0)'
-                    onChangeText={(cardno) => this.cc_format( cardno )}
-                    value={this.state.cardno}
-                  />
-                </View>
-              </View>
-            </View>
-            <Text style={{ color: '#EE312A', fontSize: 10, display: this.state.cardnoErr, fontWeight: 'bold', marginTop: 5}}>Enter a valid credit card number</Text>
-          </View>
-          <View style={styles.formGroup}>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-              <View style={{ flexGrow: 1, paddingRight: 10, maxWidth:150 }}>
-                <Text style={styles.label}>Exp. Date</Text>
-                <View style={styles.input}>
-                  <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+      <KeyboardAvoidingView style={styles.container} behavior="padding" enabled>
+        <KeyboardAwareScrollView  keyboardShouldPersistTaps='always'>
+          <Pin primarycolor={this.props.primarycolor} secondarycolor={this.props.secondarycolor} pinModal={this.state.pinModal} confirm={this.confirmPin} pin={this.state.pin} pinEdit={(pin) => this.setState({ pin })} />
+          <Otp primarycolor={this.props.primarycolor} secondarycolor={this.props.secondarycolor} otpModal={this.state.otpModal} confirm={this.confirmOtp} otp={this.state.otp} chargeResponseMessage={this.state.chargeResponseMessage} otpEdit={(otp) => this.setState({ otp })} />
+          <IntlModal primarycolor={this.props.primarycolor} secondarycolor={this.props.secondarycolor} intlModal={this.state.intlModal} confirm={this.confirmIntl} />
+          <VBVSecure vbvModal={this.state.vbvModal} url={this.state.vbvurl} confirm={this.confirmVBV} />
+          <View style={{flex:1}}>
+            <View style={styles.formGroup}>
+              <Text style={styles.label}>Card Number</Text>
+              <View style={styles.input}>
+                <View style={{ paddingVertical: 10, flexDirection: 'row' }}>
+                  <View style={{ paddingTop: 6 }}>
+                    {card}
+                  </View>
+                  <View>
                     <TextInput
                       autoCorrect={false}
-                      editable={(this.state.loading) ? false : true}
-                      ref="1"
+                      editable={(this.state.loading)?false:true}
                       keyboardType="numeric"
-                      style={{ fontSize: 20, flexGrow: 2, height: 45 }}
+                      style={{ fontSize: 20, paddingHorizontal: 10, minWidth:"95%"}}
                       underlineColorAndroid='rgba(0,0,0,0)'
-                      placeholder="MM"
-                      maxLength={2}
-                      onChangeText={(expirymonth) => {
-                        let status = 1;
-                        if (expirymonth == 2) {
-                          this.setState({ expirymonth: "02" });
-                          status = 2;
-                        }
-                        else if (expirymonth == 3) {
-                          this.setState({ expirymonth: "03" })
-                          status = 2;
-                        }
-                        else if (expirymonth == 4) {
-                          this.setState({ expirymonth: "04" })
-                          status = 2;
-                        }
-                        else if (expirymonth == 5) {
-                          this.setState({ expirymonth: "05" })
-                          status = 2;
-                        }
-                        else if (expirymonth == 6) {
-                          this.setState({ expirymonth: "06" })
-                          status = 2;
-                        }
-                        else if (expirymonth == 7) {
-                          this.setState({ expirymonth: "07" })
-                          status = 2;
-                        }
-                        else if (expirymonth == 8) {
-                          this.setState({ expirymonth: "08" })
-                          status = 2;
-                        }
-                        else if (expirymonth == 9) {
-                          this.setState({ expirymonth: "09" })
-                          status = 2;
-                        }
-                        else if (expirymonth > 12) {
-                          this.setState({ expirymonth: "12" })
-                          status = 2;
-                        } else {
-                          if (expirymonth.length >= 2) {
-                            status = 2;
-                          }
-                          this.setState({ expirymonth })
-                        }
-
-                        if (status >= 2) {
-                          this.refs[2].focus();
-                        }
-                      }}
-                      value={this.state.expirymonth}
-                    />
-                    <Text style={{ fontSize: 20, paddingTop:7, flexGrow: 1 }}>/</Text>
-                    <TextInput
-                      autoCorrect={false}
-                      editable={(this.state.loading) ? false : true}
-                      ref="2"
-                      keyboardType="numeric"
-                      style={{ fontSize: 20, flexGrow: 2, height: 45 }}
-                      underlineColorAndroid='rgba(0,0,0,0)'
-                      placeholder="YY"
-                      maxLength={2}
-                      onChangeText={(expiryyear) => {
-                        this.setState({ expiryyear })
-
-                        if (this.state.expirymonth.length < 2) {
-                          this.refs[1].focus();
-                        } else {
-                          if (expiryyear.length >= 2) {
-                            this.refs[3].focus();
-                          }
-                        }
-
-                        
-                      }}
-                      value={this.state.expiryyear}
+                      onChangeText={(cardno) => this.cc_format( cardno )}
+                      value={this.state.cardno}
                     />
                   </View>
                 </View>
-
-                <Text style={{ color: '#EE312A', fontSize: 10, display: this.state.dateErr, fontWeight: 'bold', marginTop: 5 }}>Enter a valid expiry date</Text>
               </View>
-              <View style={{ flexGrow: 1, paddingLeft: 10, maxWidth: 150  }}>
-                <Text style={styles.label}>CVV/CVV2</Text>
-                <View style={styles.input}>
-                  <TextInput
-                    ref="3"
-                    autoCorrect={false}
-                    editable={(this.state.loading) ? false : true}
-                    keyboardType="numeric"
-                    maxLength={4}
-                    // secureTextEntry={true}
-                    underlineColorAndroid='rgba(0,0,0,0)'
-                    style={{ height: 45, width: '100%', fontSize: 20 }}
-                    onChangeText={(cvv) => this.setState({ cvv })}
-                    value={this.state.cvv}
-                  />
-                </View>
-                <Text style={{ color: '#EE312A', fontSize: 10, display: this.state.cvvErr, fontWeight: 'bold', marginTop: 5 }}>Enter a valid CVV</Text>
-              </View>
+              <Text style={{ color: '#EE312A', fontSize: 10, display: this.state.cardnoErr, fontWeight: 'bold', marginTop: 5}}>Enter a valid credit card number</Text>
             </View>
-              
-          </View>       
-        </View>
+            <View style={styles.formGroup}>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                <View style={{ flexGrow: 1, paddingRight: 10, maxWidth:150 }}>
+                  <Text style={styles.label}>Exp. Date</Text>
+                  <View style={styles.input}>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                      <TextInput
+                        autoCorrect={false}
+                        editable={(this.state.loading) ? false : true}
+                        ref="1"
+                        keyboardType="numeric"
+                        style={{ fontSize: 20, flexGrow: 2, height: 45, alignSelf: 'flex-start', width: '45%' }}
+                        underlineColorAndroid='rgba(0,0,0,0)'
+                        placeholder="MM"
+                        maxLength={2}
+                        onChangeText={(expirymonth) => {
+                          let status = 1;
+                          if (expirymonth == 2) {
+                            this.setState({ expirymonth: "02" });
+                            status = 2;
+                          }
+                          else if (expirymonth == 3) {
+                            this.setState({ expirymonth: "03" })
+                            status = 2;
+                          }
+                          else if (expirymonth == 4) {
+                            this.setState({ expirymonth: "04" })
+                            status = 2;
+                          }
+                          else if (expirymonth == 5) {
+                            this.setState({ expirymonth: "05" })
+                            status = 2;
+                          }
+                          else if (expirymonth == 6) {
+                            this.setState({ expirymonth: "06" })
+                            status = 2;
+                          }
+                          else if (expirymonth == 7) {
+                            this.setState({ expirymonth: "07" })
+                            status = 2;
+                          }
+                          else if (expirymonth == 8) {
+                            this.setState({ expirymonth: "08" })
+                            status = 2;
+                          }
+                          else if (expirymonth == 9) {
+                            this.setState({ expirymonth: "09" })
+                            status = 2;
+                          }
+                          else if (expirymonth > 12) {
+                            this.setState({ expirymonth: "12" })
+                            status = 2;
+                          } else {
+                            if (expirymonth.length >= 2) {
+                              status = 2;
+                            }
+                            this.setState({ expirymonth })
+                          }
 
-        <TouchableOpacity onPress={this.pay} style={{ width: "100%", marginTop: 25 }} disabled={(this.state.loading == false)? false : true}>
-          <View style={{ backgroundColor: this.props.primarycolor, paddingVertical: 15, borderRadius: 5, opacity:(this.state.loading == false) ? 1 : 0.6 }}>
-            {btnText}
+                          if (status >= 2) {
+                            this.refs[2].focus();
+                          }
+                        }}
+                        value={this.state.expirymonth}
+                      />
+                      <Text style={{ fontSize: 20, paddingTop: 7, alignSelf: 'stretch', width: '10%' }}>/</Text>
+                      <TextInput
+                        autoCorrect={false}
+                        editable={(this.state.loading) ? false : true}
+                        ref="2"
+                        keyboardType="numeric"
+                        style={{ fontSize: 20, flexGrow: 2, height: 45, alignSelf: 'flex-end', width: '45%', textAlign: 'right' }}
+                      underlineColorAndroid='rgba(0,0,0,0)'
+                      placeholder="YY"
+                        maxLength={2}
+                        onChangeText={(expiryyear) => {
+                          this.setState({ expiryyear })
+
+                          if (this.state.expirymonth.length < 2) {
+                            this.refs[1].focus();
+                          } else {
+                            if (expiryyear.length >= 2) {
+                              this.refs[3].focus();
+                            }
+                          }
+
+                          
+                        }}
+                        value={this.state.expiryyear}
+                      />
+                    </View>
+                  </View>
+
+                  <Text style={{ color: '#EE312A', fontSize: 10, display: this.state.dateErr, fontWeight: 'bold', marginTop: 5 }}>Enter a valid expiry date</Text>
+                </View>
+                <View style={{ flexGrow: 1, paddingLeft: 10, maxWidth: 150  }}>
+                  <Text style={styles.label}>CVV/CVV2</Text>
+                  <View style={styles.input}>
+                    <TextInput
+                      ref="3"
+                      autoCorrect={false}
+                      editable={(this.state.loading) ? false : true}
+                      keyboardType="numeric"
+                      maxLength={4}
+                      // secureTextEntry={true}
+                      underlineColorAndroid='rgba(0,0,0,0)'
+                      style={{ height: 45, width: '100%', fontSize: 20 }}
+                      onChangeText={(cvv) => this.setState({ cvv })}
+                      value={this.state.cvv}
+                    />
+                  </View>
+                  <Text style={{ color: '#EE312A', fontSize: 10, display: this.state.cvvErr, fontWeight: 'bold', marginTop: 5 }}>Enter a valid CVV</Text>
+                </View>
+              </View>
+                
+            </View>       
           </View>
-        </TouchableOpacity>
-      </KeyboardAwareScrollView>
+
+          <TouchableOpacity onPress={this.pay} style={{ width: "100%", marginTop: 25 }} disabled={(this.state.loading == false)? false : true}>
+            <View style={{ backgroundColor: this.props.primarycolor, paddingVertical: 15, borderRadius: 5, opacity:(this.state.loading == false) ? 1 : 0.6 }}>
+              {btnText}
+            </View>
+          </TouchableOpacity>
+        </KeyboardAwareScrollView>
+      </KeyboardAvoidingView>
     )
   }
 }
