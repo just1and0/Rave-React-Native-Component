@@ -1,17 +1,18 @@
 {
   "name": "react-native-rave",
   "main": "Rave.js",
-  "version": "0.0.5",
+  "version": "0.0.7",
   "author": "Oluwole Adebiyi, Tofunmi Kupoluyi",
   "license": "MIT",
   "dependencies": {
+    "axios": "^0.18.0",
     "card-validator": "^5.0.0",
     "dateformat": "^3.0.3",
+    "md5": "^2.2.1",
     "native-base": "^2.7.2",
     "node-forge": "^0.7.5",
     "prop-types": "^15.6.2",
     "react": "16.3.1",
-    "md5": "^2.2.1",
     "react-native": "~0.55.2",
     "react-native-keyboard-aware-scroll-view": "^0.6.0"
   }
