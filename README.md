@@ -1,5 +1,7 @@
 # Rave By Flutterwave React Native Component
 
+<img src="https://raw.githubusercontent.com/kingflamez/Rave-React-Native-Component/master/img/rnapp.png" style="text-align: center;max-height: 400;">
+
 > Implement Rave By Flutterwave easily with React Native
 
 - Go to [Flutterwave Rave Live](https://rave.flutterwave.com/dashboard/settings/apis) to get your **`LIVE`** public and private key
