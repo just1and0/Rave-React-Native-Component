@@ -121,6 +121,22 @@ export default class index extends Component {
           phonenumberErr: 'flex'
         })
       }
+    } else if (this.state.accountbank == "058" || this.state.accountbank == "011") {
+      if (Number(this.props.amount) < 100 ) {
+        Alert.alert(
+          'Alert',
+          'Amount can\'t be less than 100',
+          [
+            {
+              text: 'Cancel', onPress: () => this.setState({
+                loading: false
+              }) },
+          ],
+          { cancelable: false }
+        )
+      } else {
+        return true
+      }
     } else if (this.state.accountbank == "057"){
       if (!this.state.selectedDate) {
         this.setState({

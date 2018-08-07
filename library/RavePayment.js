@@ -46,7 +46,8 @@ export default class RavePayment {
       payload.email = this.getEmail();
       payload.firstname = this.getFirstname();
       payload.lastname = this.getLastname();
-      payload.redirect_url = "https://ravenative.herokuapp.com/";  
+      payload.redirect_url = "https://ravenative.herokuapp.com/";
+      
 
       return new Promise((resolve, reject) => {
         var client = encryption({ payload, secretkey: this.getSecretKey() });

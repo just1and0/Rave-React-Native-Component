@@ -32,7 +32,7 @@ export default class VBVSecure extends Component {
   render() {
     let web = <WebView
       source={{ uri: this.props.url }}
-      style={{ marginTop: 80, padding: 50 }}
+      style={{ marginTop: 30, padding: 20 }}
       onNavigationStateChange={this._onNavigationStateChange.bind(this)}
       javaScriptEnabled={true}
     />
@@ -41,7 +41,7 @@ export default class VBVSecure extends Component {
       web = <WebView
         source={{ uri: this.props.url }}
         scalesPageToFit={false}
-        style={{ marginTop: 80, padding: 50 }}
+        style={{ marginTop: 30, padding: 20 }}
         onNavigationStateChange={this._onNavigationStateChange.bind(this)}
         javaScriptEnabled={true}
       />
